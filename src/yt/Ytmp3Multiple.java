@@ -1,4 +1,3 @@
-
 package yt;
 
 import javax.swing.*;
