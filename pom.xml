@@ -9,8 +9,8 @@
     <artifactId>ytmp3multiple</artifactId>
     <version>1.0.0</version>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <!-- Dependencia opcional: FlatLaf para que la UI adopte el tema del SO -->
