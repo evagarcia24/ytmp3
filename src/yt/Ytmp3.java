@@ -304,9 +304,21 @@ public class Ytmp3 extends JFrame {
         }
     }
     
+
+    
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new Ytmp3().setVisible(true);
-        });
+        // 1️⃣  Usa el tema del SO (Windows, macOS, Linux‑GTK, …)
+        try {
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();   // si algo falla, se usará el LAF por defecto
+        }
+
+        // 2️⃣  (opcional) cambiar fuente global para que todo luzca más homogeneo
+        Font defaultFont = new Font("Segoe UI", Font.PLAIN, 13); // o “SansSerif”
+        UIManager.put("defaultFont", defaultFont);
+
+        SwingUtilities.invokeLater(() -> new Ytmp3().setVisible(true));
     }
 }
