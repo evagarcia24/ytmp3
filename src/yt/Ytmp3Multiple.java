@@ -1,8 +1,6 @@
 
 package yt;
 
-
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -461,6 +459,10 @@ public class Ytmp3Multiple extends JFrame {
  * -------------------------------------------------------
  */
 class RoundedLineBorder extends LineBorder {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final int radius;
 
 	RoundedLineBorder(Color color, int radius, int thickness) {

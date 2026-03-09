@@ -21,8 +21,8 @@ Con Maven (recomendado)
 
 Sin Maven (solo javac)
   javac -d out -sourcepath src src/yt/Ytmp3.java src/yt/Ytmp3Multiple.java
-  java -cp out yt.Ytmp3           # descarga un solo video
-  java -cp out yt.Ytmp3Multiple   # descarga varios videos
+  java -cp out yt.Ytmp3           # descarga un solo video o lista de reproduccion
+  java -cp out yt.Ytmp3Multiple   # descarga varios videos o lista de reproduccion
 
 🛠️ Uso
 1️⃣ Descargar un único video
