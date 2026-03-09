@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 public class Ytmp3 extends JFrame {
@@ -24,7 +25,7 @@ public class Ytmp3 extends JFrame {
     public Ytmp3() {
         setTitle("YouTube MP3 Downloader v3.0 - Sin ffmpeg");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(700, 500);
+        setSize(800, 600);
         setLocationRelativeTo(null);
         
         // Configurar ejecutable
@@ -50,24 +51,30 @@ public class Ytmp3 extends JFrame {
     }
     
     private void downloadYtDlp() {
-        log("Descargando yt-dlp...");
+        log("Descargando yt-dlp…");
         try {
-            URL url = new URL("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe");
+            // ---- 1️⃣ Crear URI y convertir a URL ----
+            URL url = URI.create(
+                    "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe")
+                    .toURL();
+
+            // ---- 2️⃣ Abrir la conexión (HttpURLConnection sigue siendo válido) ----
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-            
+
+            // ---- 3️⃣ Copiar el stream al fichero local ----
             try (InputStream in = connection.getInputStream();
                  FileOutputStream out = new FileOutputStream(ytDlpExe)) {
-                
+
                 byte[] buffer = new byte[8192];
                 int bytesRead;
                 while ((bytesRead = in.read(buffer)) != -1) {
                     out.write(buffer, 0, bytesRead);
                 }
             }
-            
+
             log("yt-dlp descargado exitosamente!");
-            
+
         } catch (Exception e) {
             log("Error descargando yt-dlp: " + e.getMessage());
             log("Por favor descarga manualmente yt-dlp.exe y colócalo en la carpeta lib/");
