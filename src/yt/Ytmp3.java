@@ -153,8 +153,8 @@ public class Ytmp3 extends JFrame {
     private class DownloadAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String url = urlField.getText().trim();
-            
+            String url = urlField.getText().trim().toLowerCase();
+                   
             if (url.isEmpty()) {
                 JOptionPane.showMessageDialog(Ytmp3.this, 
                     "Por favor ingresa una URL válida", 
@@ -163,8 +163,24 @@ public class Ytmp3 extends JFrame {
                 return;
             }
             
+            if (!url.contains("youtube.com")          // cubre youtube.com, www.youtube.com, m.youtube.com, music.youtube.com, etc.
+                    && !url.contains("youtu.be")      // enlace corto
+                    && !url.contains("youtube-nocookie.com")) { // casos especiales de embed
+
+                JOptionPane.showMessageDialog(
+                        Ytmp3.this,
+                        "Por favor ingresa una URL válida de YouTube",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+
+            
             // Ejecutar en hilo separado para no bloquear la UI
             new Thread(new DownloadTask(url)).start();
+            
+            
         }
     }
     

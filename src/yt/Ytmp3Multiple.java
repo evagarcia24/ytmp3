@@ -39,7 +39,7 @@ public class Ytmp3Multiple extends JFrame {
 		} catch (Exception ignored) {
 		}
 
-		setTitle("YouTube MP3 Downloader – Multiple URLs");
+		setTitle("YouTube MP3 Downloader – Multiples URLs");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(850, 620);
 		setLocationRelativeTo(null);
@@ -249,16 +249,48 @@ public class Ytmp3Multiple extends JFrame {
 	 * MP3” (una sola URL) -------------------------------------------------------
 	 */
 	private class DownloadAction implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String url = urlField.getText().trim();
-			if (url.isEmpty()) {
-				JOptionPane.showMessageDialog(Ytmp3Multiple.this, "Introduce una URL válida", "Error",
-						JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			new Thread(new DownloadTask(url)).start();
-		}
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+	        // Obtén la URL y conviértela a minúsculas (para la comparación con contains)
+	        String url = urlField.getText().trim().toLowerCase();
+
+	        /* -------------------------------------------------
+	         * 1️⃣  ¿La caja está vacía?
+	         * ------------------------------------------------- */
+	        if (url.isEmpty()) {
+	            JOptionPane.showMessageDialog(
+	                    Ytmp3Multiple.this,
+	                    "Introduce una URL válida",
+	                    "Error",
+	                    JOptionPane.ERROR_MESSAGE);
+	            return;                     // Salimos, no hay nada que procesar
+	        }
+
+	        /* -------------------------------------------------
+	         * 2️⃣  ¿La URL pertenece a YouTube?
+	         *    • youtube.com (cubre www., m., music., etc.)
+	         *    • youtu.be  (enlace corto)
+	         *    • youtube-nocookie.com (embed sin cookies)
+	         * ------------------------------------------------- */
+	        if (!url.contains("youtube.com")          // ej.: youtube.com, www.youtube.com, m.youtube.com …
+	                && !url.contains("youtu.be")      // ej.: youtu.be/abc123XYZ45
+	                && !url.contains("youtube-nocookie.com")) { // embed sin cookies
+
+	            JOptionPane.showMessageDialog(
+	                    Ytmp3Multiple.this,
+	                    "Por favor ingresa una URL válida de YouTube",
+	                    "Error",
+	                    JOptionPane.ERROR_MESSAGE);
+	            return;                     // Salimos, la URL no es de YouTube
+	        }
+
+	        /* -------------------------------------------------
+	         * 3️⃣  Todo está correcto → lanzamos la descarga en
+	         *     un hilo independiente para no bloquear la UI.
+	         * ------------------------------------------------- */
+	        new Thread(new DownloadTask(url)).start();
+	    }
 	}
 
 	/*
