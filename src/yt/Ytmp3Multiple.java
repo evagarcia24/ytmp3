@@ -39,7 +39,7 @@ public class Ytmp3Multiple extends JFrame {
 		} catch (Exception ignored) {
 		}
 
-		setTitle("YouTube MP3 Downloader – Multiples URLs");
+		setTitle("YouTube MP3 Downloader – Multiples URLs y/o Lista de reproducción");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(850, 620);
 		setLocationRelativeTo(null);
