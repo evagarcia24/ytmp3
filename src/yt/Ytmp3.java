@@ -1,5 +1,4 @@
 package yt;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -24,7 +23,7 @@ public class Ytmp3 extends JFrame {
     private File ytDlpExe;
     
     public Ytmp3() {
-        setTitle("YouTube MP3 Downloader v3.0 - Sin ffmpeg");
+        setTitle("YouTube MP3 Downloader v3.0 - Unico link para descargar");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         setLocationRelativeTo(null);
