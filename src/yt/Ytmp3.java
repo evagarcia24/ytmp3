@@ -153,7 +153,7 @@ public class Ytmp3 extends JFrame {
     private class DownloadAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String url = urlField.getText().trim().toLowerCase();
+            String url = urlField.getText().trim();
                    
             if (url.isEmpty()) {
                 JOptionPane.showMessageDialog(Ytmp3.this, 
@@ -163,7 +163,7 @@ public class Ytmp3 extends JFrame {
                 return;
             }
             
-            if (!url.contains("youtube.com")          // cubre youtube.com, www.youtube.e, m.youtube.com, music.youtube.com, etc.
+            if (!url.contains("youtube")          // cubre youtube.com, www.youtube.es, m.youtube.com, music.youtube.com, etc.
                     && !url.contains("youtu.be")      // enlace corto
                     && !url.contains("youtube-nocookie.com")) { // casos especiales de embed
 

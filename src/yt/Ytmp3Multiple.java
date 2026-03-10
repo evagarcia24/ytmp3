@@ -137,8 +137,8 @@ public class Ytmp3Multiple extends JFrame {
 
 		logArea = new JTextArea(15, 55);
 		logArea.setEditable(false);
-		logArea.setBackground(Color.WHITE);
-		logArea.setForeground(Color.DARK_GRAY);
+		logArea.setBackground(Color.BLACK);
+		logArea.setForeground(Color.WHITE);
 		logArea.setFont(new Font("Consolas", Font.PLAIN, 12));
 		logArea.setBorder(BorderFactory.createCompoundBorder(new RoundedLineBorder(new Color(0xCCCCCC), 8, 2),
 				BorderFactory.createEmptyBorder(6, 6, 6, 6)));
@@ -217,8 +217,9 @@ public class Ytmp3Multiple extends JFrame {
 		gbc.gridwidth = 1;
 
 		/* ----- Área central (logs) ----- */
-		JScrollPane scrollPane = new JScrollPane(logArea);
-		scrollPane.setBorder(BorderFactory.createTitledBorder("Logs de descarga"));
+        JScrollPane scrollPane = new JScrollPane(logArea);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Logs de Descarga"));
+        add(scrollPane, BorderLayout.CENTER);
 
 		/* ----- Panel inferior (progreso + estado) ----- */
 		JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -253,7 +254,7 @@ public class Ytmp3Multiple extends JFrame {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 	        // Obtén la URL y conviértela a minúsculas (para la comparación con contains)
-	        String url = urlField.getText().trim().toLowerCase();
+	        String url = urlField.getText().trim();
 
 	        /* -------------------------------------------------
 	         * 1️⃣  ¿La caja está vacía?
