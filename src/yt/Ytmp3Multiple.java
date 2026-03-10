@@ -269,11 +269,11 @@ public class Ytmp3Multiple extends JFrame {
 
 	        /* -------------------------------------------------
 	         * 2️⃣  ¿La URL pertenece a YouTube?
-	         *    • youtube.com (cubre www., m., music., etc.)
+	         *    • youtube (cubre www., m., music., DIFERENTES .COM, .ES, ETC...)
 	         *    • youtu.be  (enlace corto)
 	         *    • youtube-nocookie.com (embed sin cookies)
 	         * ------------------------------------------------- */
-	        if (!url.contains("youtube.com")          // ej.: youtube.com, www.youtube.com, m.youtube.com …
+	        if (!url.contains("youtube.")          // ej.: youtube.com, www.youtube.es, m.youtube.com …
 	                && !url.contains("youtu.be")      // ej.: youtu.be/abc123XYZ45
 	                && !url.contains("youtube-nocookie.com")) { // embed sin cookies
 
