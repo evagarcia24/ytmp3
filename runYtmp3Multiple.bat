@@ -1,26 +1,39 @@
 @echo off
 rem -------------------------------------------------
-rem   runYtmp3Multiple.bat – lanza la aplicación
+rem   runYtmp3Multiple.bat – Lanza YouTube MP3 Downloader
 rem -------------------------------------------------
-set "JAR=%~dp0Ytmp3Multiple.jar"
 
-if not exist "%JAR%" (
-    echo [ERROR] No se encontro el archivo "%JAR%".
+cd /d "%~dp0"
+
+echo ========================================
+echo   YouTube MP3 Downloader
+echo ========================================
+echo.
+
+rem Verificar Java
+java -version >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Java no está instalado o no está en el PATH
+    echo Descárgalo de: https://www.java.com/download/
     pause
     exit /b 1
 )
 
-rem ----- Verificar que Java está en el PATH -----
-where java >nul 2>&1
-if %errorlevel% neq 0 (
-    echo -------------------------------------------------
-    echo  Java no esta instalado o no esta en el PATH.
-    echo  Descarga la JRE (Java Runtime) aqui:
-    echo  https://adoptium.net/  (elige la version LTS, p.ej. 17)
-    echo -------------------------------------------------
+rem Verificar JAR
+if not exist "Ytmp3Multiple.jar" (
+    echo [ERROR] No se encontró Ytmp3Multiple.jar
+    echo Asegúrate de que esté en la misma carpeta que este archivo
     pause
     exit /b 1
 )
 
-java -jar "%JAR%" %*
-pause
+rem Ejecutar
+echo Iniciando aplicación...
+echo.
+java -jar Ytmp3Multiple.jar
+
+if errorlevel 1 (
+    echo.
+    echo [ERROR] La aplicación terminó con errores
+    pause
+)
