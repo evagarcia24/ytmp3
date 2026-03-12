@@ -53,7 +53,6 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 
-
 /* ==========================================================
    Ytmp3Multiple – Descarga en lote de varios enlaces YouTube
    ========================================================== */
@@ -71,22 +70,23 @@ public class Ytmp3Multiple extends JFrame {
 	private static final int TRUNCATE_URL_LENGTH = 50;
 
 	// Paleta dark
-	private static final Color DARK_BG        = new Color(0x1E1E2E);  // fondo principal
-	private static final Color DARK_SURFACE   = new Color(0x2A2A3C);  // paneles, campos
-	private static final Color DARK_BORDER    = new Color(0x3A3A4E);  // bordes sutiles
-	private static final Color DARK_TEXT      = new Color(0xE0E0E0);  // texto principal
-	private static final Color DARK_TEXT_SEC  = new Color(0xA0A0B0);  // texto secundario
-	private static final Color ACCENT         = new Color(0x6C9FFF);  // azul acento
-	private static final Color ACCENT_HOVER   = new Color(0x8AB4FF);  // hover
-	private static final Color SUCCESS_GREEN  = new Color(0x66BB6A);  // estado OK
-	private static final Color LOG_BG         = new Color(0x12121C);  // fondo logs
-	private static final Color LOG_FG         = new Color(0xC8C8D2);  // texto logs
-	private static final Color PROGRESS_FG    = ACCENT;
-	private static final Color PROGRESS_BG    = DARK_BORDER;
-	private static final Color STATUS_FG      = SUCCESS_GREEN;
-	private static final Color BORDER_COLOR   = DARK_BORDER;
 
-	/** Regex para validar URLs de YouTube (cubre www., m., music., youtu.be, nocookie) */
+	private static final Color DARK_BORDER = new Color(0x3A3A4E); // bordes sutiles
+
+	private static final Color ACCENT = new Color(0x6C9FFF); // azul acento
+
+	private static final Color SUCCESS_GREEN = new Color(0x66BB6A); // estado OK
+	private static final Color LOG_BG = new Color(0x12121C); // fondo logs
+	private static final Color LOG_FG = new Color(0xC8C8D2); // texto logs
+	private static final Color PROGRESS_FG = ACCENT;
+	private static final Color PROGRESS_BG = DARK_BORDER;
+	private static final Color STATUS_FG = SUCCESS_GREEN;
+	private static final Color BORDER_COLOR = DARK_BORDER;
+
+	/**
+	 * Regex para validar URLs de YouTube (cubre www., m., music., youtu.be,
+	 * nocookie)
+	 */
 	private static final Pattern YOUTUBE_PATTERN = Pattern.compile(
 			"^(https?://)?(www\\.|m\\.|music\\.)?youtu(\\.be/|be\\.com/|be-nocookie\\.com/).+",
 			Pattern.CASE_INSENSITIVE);
@@ -108,7 +108,9 @@ public class Ytmp3Multiple extends JFrame {
 	private JButton removeButtonLocal;
 	private JButton openFolderBtn;
 
-	/** Lista de títulos descargados – sincronizada para acceso desde worker + EDT */
+	/**
+	 * Lista de títulos descargados – sincronizada para acceso desde worker + EDT
+	 */
 	private final List<String> downloadedTitles = Collections.synchronizedList(new ArrayList<>());
 
 	/** Proceso actual de yt-dlp (volatile para visibilidad entre hilos) */
@@ -116,7 +118,6 @@ public class Ytmp3Multiple extends JFrame {
 
 	/** Worker activo (para poder cancelarlo) */
 	private volatile SwingWorker<?, ?> activeWorker;
-
 
 	/* -------------------- CONSTRUCTOR -------------------- */
 	public Ytmp3Multiple() {
@@ -146,9 +147,7 @@ public class Ytmp3Multiple extends JFrame {
 			}
 
 			if (urlListModel.contains(txt)) {
-				JOptionPane.showMessageDialog(this,
-						"Este link ya está en la lista.",
-						"URL duplicada",
+				JOptionPane.showMessageDialog(this, "Este link ya está en la lista.", "URL duplicada",
 						JOptionPane.WARNING_MESSAGE);
 				statusLabel.setText("⚠️ Link ya añadido");
 				return;
@@ -157,11 +156,9 @@ public class Ytmp3Multiple extends JFrame {
 			// ¿Es una playlist?
 			if (txt.contains("list=") || txt.contains("/playlist")) {
 				int choice = JOptionPane.showConfirmDialog(this,
-						"📋 Esta URL es una lista de reproducción.\n\n" +
-								"¿Quieres añadirla para descargar TODAS las canciones?",
-						"Playlist detectada",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
+						"📋 Esta URL es una lista de reproducción.\n\n"
+								+ "¿Quieres añadirla para descargar TODAS las canciones?",
+						"Playlist detectada", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
 				if (choice != JOptionPane.YES_OPTION) {
 					statusLabel.setText("⚠️ Playlist no añadida");
@@ -175,7 +172,6 @@ public class Ytmp3Multiple extends JFrame {
 			statusLabel.setText("✅ URL añadida");
 			log("➕ Añadida: " + truncateUrl(txt));
 		});
-
 
 		// Acción "Descargar todos"
 		downloadAllButton.addActionListener(e -> {
@@ -211,8 +207,7 @@ public class Ytmp3Multiple extends JFrame {
 					String text = (String) cb.getData(DataFlavor.stringFlavor);
 					if (text != null && !text.trim().isEmpty()) {
 						String trimmed = text.trim();
-						if (isYouTubeUrl(trimmed)
-								&& !trimmed.equals(lastClipboard)
+						if (isYouTubeUrl(trimmed) && !trimmed.equals(lastClipboard)
 								&& !urlListModel.contains(trimmed)) {
 							lastClipboard = trimmed;
 							urlField.setText(trimmed);
@@ -232,9 +227,7 @@ public class Ytmp3Multiple extends JFrame {
 
 	/** Trunca URLs largas para no romper el log */
 	private String truncateUrl(String url) {
-		return url.length() > TRUNCATE_URL_LENGTH
-				? url.substring(0, TRUNCATE_URL_LENGTH - 3) + "..."
-				: url;
+		return url.length() > TRUNCATE_URL_LENGTH ? url.substring(0, TRUNCATE_URL_LENGTH - 3) + "..." : url;
 	}
 
 	/** Valida si una URL pertenece a YouTube usando regex */
@@ -243,8 +236,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 1️⃣ Preparar ejecutable yt‑dlp (descargar si falta)
+	 * ------------------------------------------------------- 1️⃣ Preparar
+	 * ejecutable yt‑dlp (descargar si falta)
 	 * -------------------------------------------------------
 	 */
 	private void setupExecutables() {
@@ -284,9 +277,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 2️⃣ Instanciar componentes UI
-	 * -------------------------------------------------------
+	 * ------------------------------------------------------- 2️⃣ Instanciar
+	 * componentes UI -------------------------------------------------------
 	 */
 	private void initComponents() {
 		urlField = new JTextField(40);
@@ -307,8 +299,7 @@ public class Ytmp3Multiple extends JFrame {
 		logArea.setForeground(LOG_FG);
 		logArea.setCaretColor(LOG_FG);
 		logArea.setFont(new Font("Consolas", Font.PLAIN, 12));
-		logArea.setBorder(BorderFactory.createCompoundBorder(
-				new RoundedLineBorder(BORDER_COLOR, 8, 2),
+		logArea.setBorder(BorderFactory.createCompoundBorder(new RoundedLineBorder(BORDER_COLOR, 8, 2),
 				BorderFactory.createEmptyBorder(6, 6, 6, 6)));
 
 		progressBar = new JProgressBar(0, 100);
@@ -344,7 +335,8 @@ public class Ytmp3Multiple extends JFrame {
 		openFolderBtn.addActionListener(e -> {
 			try {
 				File dir = new File(DOWNLOADS_DIR);
-				if (!dir.exists()) dir.mkdirs();
+				if (!dir.exists())
+					dir.mkdirs();
 				Desktop.getDesktop().open(dir);
 			} catch (Exception ex) {
 				log("❌ No se pudo abrir la carpeta: " + ex.getMessage());
@@ -353,9 +345,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 3️⃣ Layout – GridBagLayout
-	 * -------------------------------------------------------
+	 * ------------------------------------------------------- 3️⃣ Layout –
+	 * GridBagLayout -------------------------------------------------------
 	 */
 	private void layoutComponents() {
 
@@ -442,8 +433,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 4️⃣ Helper: escribir en el área de log (thread‑safe)
+	 * ------------------------------------------------------- 4️⃣ Helper: escribir
+	 * en el área de log (thread‑safe)
 	 * -------------------------------------------------------
 	 */
 	private void log(String msg) {
@@ -454,25 +445,20 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 5️⃣ Descarga única desde el campo de texto
+	 * ------------------------------------------------------- 5️⃣ Descarga única
+	 * desde el campo de texto
 	 * -------------------------------------------------------
 	 */
 	private void downloadSingleFromField() {
 		String url = urlField.getText().trim();
 
 		if (url.isEmpty()) {
-			JOptionPane.showMessageDialog(this,
-					"Introduce una URL válida",
-					"Error",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Introduce una URL válida", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
 		if (!isYouTubeUrl(url)) {
-			JOptionPane.showMessageDialog(this,
-					"Por favor ingresa una URL válida de YouTube",
-					"Error",
+			JOptionPane.showMessageDialog(this, "Por favor ingresa una URL válida de YouTube", "Error",
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
@@ -497,12 +483,10 @@ public class Ytmp3Multiple extends JFrame {
 					if (exit == 0) {
 						String lastTitle = downloadedTitles.isEmpty() ? url
 								: downloadedTitles.get(downloadedTitles.size() - 1);
-						JOptionPane.showMessageDialog(Ytmp3Multiple.this,
-								"✅ Descarga completada\n\n🎵 " + lastTitle,
+						JOptionPane.showMessageDialog(Ytmp3Multiple.this, "✅ Descarga completada\n\n🎵 " + lastTitle,
 								"Éxito", JOptionPane.INFORMATION_MESSAGE);
 					} else {
-						JOptionPane.showMessageDialog(Ytmp3Multiple.this,
-								"Error en la descarga. Revisa los logs.",
+						JOptionPane.showMessageDialog(Ytmp3Multiple.this, "Error en la descarga. Revisa los logs.",
 								"Error", JOptionPane.ERROR_MESSAGE);
 					}
 				} catch (java.util.concurrent.CancellationException ce) {
@@ -519,9 +503,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 6️⃣ Cancelar la descarga en curso
-	 * -------------------------------------------------------
+	 * ------------------------------------------------------- 6️⃣ Cancelar la
+	 * descarga en curso -------------------------------------------------------
 	 */
 	private void cancelCurrentDownload() {
 		// Destruir el proceso de yt-dlp si existe
@@ -546,8 +529,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 7️⃣ MÉTODO REUTILIZABLE – descarga una URL
+	 * ------------------------------------------------------- 7️⃣ MÉTODO
+	 * REUTILIZABLE – descarga una URL
 	 * -------------------------------------------------------
 	 */
 	private int downloadSingle(String youtubeUrl) throws IOException, InterruptedException {
@@ -588,8 +571,8 @@ public class Ytmp3Multiple extends JFrame {
 		cmdList.add("0");
 		cmdList.add("--embed-thumbnail");
 		cmdList.add("--add-metadata");
-		cmdList.add("--ignore-errors");       // Continuar si un video falla
-		cmdList.add("--no-abort-on-error");   // No abortar el lote/playlist por errores
+		cmdList.add("--ignore-errors"); // Continuar si un video falla
+		cmdList.add("--no-abort-on-error"); // No abortar el lote/playlist por errores
 
 		// Si la URL es una playlist, forzar descarga completa
 		if (youtubeUrl.contains("list=") || youtubeUrl.contains("/playlist")) {
@@ -613,7 +596,8 @@ public class Ytmp3Multiple extends JFrame {
 		// Capturar output completo
 		StringBuilder outputBuilder = new StringBuilder();
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				// Check de cancelación
@@ -625,7 +609,7 @@ public class Ytmp3Multiple extends JFrame {
 				final String lineCopy = line;
 				SwingUtilities.invokeLater(() -> log(lineCopy));
 
-				// Parsear porcentaje de progreso de yt-dlp (ej: "[download]  45.2% of 5.23MiB")
+				// Parsear porcentaje de progreso de yt-dlp (ej: "[download] 45.2% of 5.23MiB")
 				if (line.contains("[download]") && line.contains("%")) {
 					try {
 						String trimmed = line.substring(line.indexOf("[download]") + 10).trim();
@@ -683,9 +667,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 8️⃣ SwingWorker para lote de URLs
-	 * -------------------------------------------------------
+	 * ------------------------------------------------------- 8️⃣ SwingWorker para
+	 * lote de URLs -------------------------------------------------------
 	 */
 	private class MultiDownloadTask extends SwingWorker<Void, String> {
 		private final List<String> urls;
@@ -699,7 +682,8 @@ public class Ytmp3Multiple extends JFrame {
 			int total = urls.size();
 			int idx = 1;
 			for (String u : urls) {
-				if (isCancelled()) break;
+				if (isCancelled())
+					break;
 
 				publish("Descargando (" + idx + "/" + total + "): " + truncateUrl(u));
 				int exit = downloadSingle(u);
@@ -707,11 +691,9 @@ public class Ytmp3Multiple extends JFrame {
 					publish("⚠️  Error al descargar: " + truncateUrl(u));
 					// Mostrar ventana de error
 					final String failedUrl = truncateUrl(u);
-					SwingUtilities.invokeLater(() -> 
-						JOptionPane.showMessageDialog(Ytmp3Multiple.this,
+					SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Ytmp3Multiple.this,
 							"❌ Error en la descarga:\n\n" + failedUrl + "\n\nRevisa los logs para más detalles.",
-							"Error en la descarga",
-							JOptionPane.ERROR_MESSAGE));
+							"Error en la descarga", JOptionPane.ERROR_MESSAGE));
 				}
 
 				// Actualizar progreso real del lote
@@ -756,9 +738,7 @@ public class Ytmp3Multiple extends JFrame {
 				}
 			}
 
-			JOptionPane.showMessageDialog(Ytmp3Multiple.this,
-					sb.toString(),
-					"🎉 Proceso finalizado",
+			JOptionPane.showMessageDialog(Ytmp3Multiple.this, sb.toString(), "🎉 Proceso finalizado",
 					JOptionPane.INFORMATION_MESSAGE);
 
 			downloadedTitles.clear();
@@ -766,8 +746,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 9️⃣ Habilitar / deshabilitar controles
+	 * ------------------------------------------------------- 9️⃣ Habilitar /
+	 * deshabilitar controles
 	 * -------------------------------------------------------
 	 */
 	private void setControlsEnabled(boolean enabled) {
@@ -779,9 +759,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 🛑 Limpiar recursos al cerrar
-	 * -------------------------------------------------------
+	 * ------------------------------------------------------- 🛑 Limpiar recursos
+	 * al cerrar -------------------------------------------------------
 	 */
 	@Override
 	protected void processWindowEvent(WindowEvent e) {
@@ -799,8 +778,8 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 🎵 Extraer TODOS los títulos del output de yt-dlp
+	 * ------------------------------------------------------- 🎵 Extraer TODOS los
+	 * títulos del output de yt-dlp
 	 * -------------------------------------------------------
 	 */
 	private List<String> extractAllTitlesFromOutput(String output) {
@@ -836,8 +815,7 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/*
-	 * ------------------------------------------------------- 
-	 * 10️⃣ MAIN
+	 * ------------------------------------------------------- 10️⃣ MAIN
 	 * -------------------------------------------------------
 	 */
 	public static void main(String[] args) {
@@ -846,14 +824,17 @@ public class Ytmp3Multiple extends JFrame {
 		SwingUtilities.invokeLater(() -> new Ytmp3Multiple().setVisible(true));
 	}
 
-	/** Configura un tema dark completo a nivel UIManager (funciona en Windows, Mac y Linux) */
+	/**
+	 * Configura un tema dark completo a nivel UIManager (funciona en Windows, Mac y
+	 * Linux)
+	 */
 	private static void applyDarkTheme() {
-		Color bg       = new Color(0x1E1E2E);
-		Color surface  = new Color(0x2A2A3C);
-		Color border   = new Color(0x3A3A4E);
-		Color text     = new Color(0xE0E0E0);
-		Color textSec  = new Color(0xA0A0B0);
-		Color accent   = new Color(0x6C9FFF);
+		Color bg = new Color(0x1E1E2E);
+		Color surface = new Color(0x2A2A3C);
+		Color border = new Color(0x3A3A4E);
+		Color text = new Color(0xE0E0E0);
+		Color textSec = new Color(0xA0A0B0);
+		Color accent = new Color(0x6C9FFF);
 
 		// Panel / ventana
 		UIManager.put("Panel.background", bg);
@@ -862,8 +843,7 @@ public class Ytmp3Multiple extends JFrame {
 		// Botones
 		UIManager.put("Button.background", surface);
 		UIManager.put("Button.foreground", text);
-		UIManager.put("Button.border", BorderFactory.createCompoundBorder(
-				BorderFactory.createLineBorder(border, 1),
+		UIManager.put("Button.border", BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(border, 1),
 				BorderFactory.createEmptyBorder(4, 12, 4, 12)));
 		UIManager.put("Button.focus", new Color(0, 0, 0, 0));
 
@@ -871,8 +851,7 @@ public class Ytmp3Multiple extends JFrame {
 		UIManager.put("TextField.background", surface);
 		UIManager.put("TextField.foreground", text);
 		UIManager.put("TextField.caretForeground", text);
-		UIManager.put("TextField.border", BorderFactory.createCompoundBorder(
-				BorderFactory.createLineBorder(border, 1),
+		UIManager.put("TextField.border", BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(border, 1),
 				BorderFactory.createEmptyBorder(4, 6, 4, 6)));
 
 		// TextArea
