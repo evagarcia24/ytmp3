@@ -71,18 +71,21 @@ public class Ytmp3Multiple extends JFrame {
 
 	// Paleta dark
 
-	private static final Color DARK_BORDER   = new Color(0x4A4A4A);
-	private static final Color ACCENT        = new Color(0x9E9E9E);
+	private static final Color DARK_BORDER = new Color(0x4A4A4A);
+	private static final Color ACCENT = new Color(0x9E9E9E);
 	private static final Color SUCCESS_GREEN = new Color(0x6FCF70);
-	private static final Color LOG_BG        = new Color(0x121212);
-	private static final Color LOG_FG        = new Color(0xD6D6D6);
+	private static final Color LOG_BG = new Color(0x121212);
+	private static final Color LOG_FG = new Color(0xD6D6D6);
 
-	private static final Color PROGRESS_FG     = ACCENT;
-	private static final Color PROGRESS_BG     = DARK_BORDER;
-	private static final Color STATUS_FG       = SUCCESS_GREEN;
-	private static final Color BORDER_COLOR    = DARK_BORDER;
+	private static final Color PROGRESS_FG = ACCENT;
+	private static final Color PROGRESS_BG = DARK_BORDER;
+	private static final Color STATUS_FG = SUCCESS_GREEN;
+	private static final Color BORDER_COLOR = DARK_BORDER;
 
-	/* ----- Regex para validar URLs de YouTube (cubre www., m., music., youtu.benocookie) ----- */
+	/*
+	 * ----- Regex para validar URLs de YouTube (cubre www., m., music.,
+	 * youtu.benocookie) -----
+	 */
 	private static final Pattern YOUTUBE_PATTERN = Pattern.compile(
 			"^(https?://)?(www\\.|m\\.|music\\.)?youtu(\\.be/|be\\.com/|be-nocookie\\.com/).+",
 			Pattern.CASE_INSENSITIVE);
@@ -104,10 +107,15 @@ public class Ytmp3Multiple extends JFrame {
 	private JButton removeButtonLocal;
 	private JButton openFolderBtn;
 
-	/* ----- Lista de títulos descargados – sincronizada para acceso desde worker + EDT ----- */
+	/*
+	 * ----- Lista de títulos descargados – sincronizada para acceso desde worker +
+	 * EDT -----
+	 */
 	private final List<String> downloadedTitles = Collections.synchronizedList(new ArrayList<>());
 
-	/** ----- Proceso actual de yt-dlp (volatile para visibilidad entre hilos) ----- */
+	/**
+	 * ----- Proceso actual de yt-dlp (volatile para visibilidad entre hilos) -----
+	 */
 	private volatile Process currentProcess;
 
 	/** ----- Worker activo (para poder cancelarlo) ----- */
@@ -229,7 +237,10 @@ public class Ytmp3Multiple extends JFrame {
 		return YOUTUBE_PATTERN.matcher(url).matches();
 	}
 
-	/* -------------------- 1️⃣ Preparar ejecutable yt‑dlp (descargar si falta) -------------------- */
+	/*
+	 * -------------------- 1️⃣ Preparar ejecutable yt‑dlp (descargar si falta)
+	 * --------------------
+	 */
 	private void setupExecutables() {
 		File libDir = new File(LIB_DIR);
 		if (!libDir.exists())
@@ -410,7 +421,7 @@ public class Ytmp3Multiple extends JFrame {
 		bottomPanel.add(progressBar, BorderLayout.NORTH);
 		bottomPanel.add(statusLabel, BorderLayout.SOUTH);
 
-		// Añadir al JFrame 
+		// Añadir al JFrame
 		add(topPanel, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
@@ -425,7 +436,7 @@ public class Ytmp3Multiple extends JFrame {
 	}
 
 	/* ----- 5️⃣ Descarga única desde el campo de texto ----- */
-		private void downloadSingleFromField() {
+	private void downloadSingleFromField() {
 		String url = urlField.getText().trim();
 
 		if (url.isEmpty()) {
@@ -738,44 +749,44 @@ public class Ytmp3Multiple extends JFrame {
 
 	/* ----- 🎵 Extraer TODOS los títulos del output de yt-dlp ----- */
 	private List<String> extractAllTitlesFromOutput(String output) {
-	    List<String> titles = new ArrayList<>();
+		List<String> titles = new ArrayList<>();
 
-	    try {
-	        String[] lines = output.split("\n");
+		try {
+			String[] lines = output.split("\n");
 
-	        for (String line : lines) {
+			for (String line : lines) {
 
-	            // 1) Nuevo formato de yt-dlp: "[download] Downloading video title: ..."
-	            if (line.contains("Downloading video title:")) {
-	                String title = line.substring(line.indexOf("Downloading video title:") + 25).trim();
-	                if (!title.isEmpty() && !titles.contains(title)) {
-	                    titles.add(title);
-	                }
-	            }
+				// 1) Nuevo formato de yt-dlp: "[download] Downloading video title: ..."
+				if (line.contains("Downloading video title:")) {
+					String title = line.substring(line.indexOf("Downloading video title:") + 25).trim();
+					if (!title.isEmpty() && !titles.contains(title)) {
+						titles.add(title);
+					}
+				}
 
-	            // 2) Formato clásico: "[download] Destination: ..."
-	            if (line.contains("Destination:")) {
-	                String filename = line.substring(line.indexOf("Destination:") + 12).trim();
+				// 2) Formato clásico: "[download] Destination: ..."
+				if (line.contains("Destination:")) {
+					String filename = line.substring(line.indexOf("Destination:") + 12).trim();
 
-	                File f = new File(filename);
-	                String name = f.getName();
+					File f = new File(filename);
+					String name = f.getName();
 
-	                int lastDot = name.lastIndexOf(".");
-	                if (lastDot > 0) {
-	                    name = name.substring(0, lastDot);
-	                }
+					int lastDot = name.lastIndexOf(".");
+					if (lastDot > 0) {
+						name = name.substring(0, lastDot);
+					}
 
-	                if (!name.isEmpty() && !titles.contains(name)) {
-	                    titles.add(name);
-	                }
-	            }
-	        }
+					if (!name.isEmpty() && !titles.contains(name)) {
+						titles.add(name);
+					}
+				}
+			}
 
-	    } catch (Exception e) {
-	        log("⚠️  Error extrayendo títulos: " + e.getMessage());
-	    }
+		} catch (Exception e) {
+			log("⚠️  Error extrayendo títulos: " + e.getMessage());
+		}
 
-	    return titles;
+		return titles;
 	}
 
 	/* ----- 10️⃣ MAIN ----- */
@@ -785,116 +796,105 @@ public class Ytmp3Multiple extends JFrame {
 		SwingUtilities.invokeLater(() -> new Ytmp3Multiple().setVisible(true));
 	}
 
-	// Configura un tema dark completo a nivel UIManager (funciona en Windows, Mac y Linux)
+	// Configura un tema dark completo a nivel UIManager (funciona en Windows, Mac y
+	// Linux)
 	private static void applyDarkTheme() {
 
-	    // 🎨 Paleta premium negro + grafito
-	    Color BLACK          = new Color(0x000000); // negro puro
-	    Color GRAPHITE_D1    = new Color(0x1A1A1A); // grafito muy oscuro
-	    Color GRAPHITE_D2    = new Color(0x2E2E2E); // grafito medio
-	    Color GRAPHITE_LIGHT = new Color(0x3C3C3C); // grafito claro premium
-	    Color TEXT_LIGHT     = new Color(0xD6D6D6); // gris claro elegante
-	    Color ACCENT_GRAY    = new Color(0x8A8A8A); // gris metálico acento
+		// 🎨 Paleta premium negro + grafito
+		Color BLACK = new Color(0x000000); // negro puro
+		Color GRAPHITE_D1 = new Color(0x1A1A1A); // grafito muy oscuro
+		Color GRAPHITE_D2 = new Color(0x2E2E2E); // grafito medio
+		Color GRAPHITE_LIGHT = new Color(0x3C3C3C); // grafito claro premium
+		Color TEXT_LIGHT = new Color(0xD6D6D6); // gris claro elegante
+		Color ACCENT_GRAY = new Color(0x8A8A8A); // gris metálico acento
 
-	    // PANEL
-	    UIManager.put("Panel.background", BLACK);
-	    UIManager.put("Panel.foreground", TEXT_LIGHT);
+		// PANEL
+		UIManager.put("Panel.background", BLACK);
+		UIManager.put("Panel.foreground", TEXT_LIGHT);
 
-	    // BOTONES
-	    // Fondo grafito claro premium
-	    UIManager.put("Button.background", GRAPHITE_LIGHT);
-	    UIManager.put("Button.foreground", TEXT_LIGHT);
+		// BOTONES
+		// Fondo grafito claro premium
+		UIManager.put("Button.background", GRAPHITE_LIGHT);
+		UIManager.put("Button.foreground", TEXT_LIGHT);
 
-	    // PADDING INTERNO
-	    UIManager.put("Button.margin", new Insets(12, 26, 12, 26));
+		// PADDING INTERNO
+		UIManager.put("Button.margin", new Insets(12, 26, 12, 26));
 
-	    // TAMAÑO
-	    UIManager.put("Button.minimumSize", new Dimension(160, 48));
+		// TAMAÑO
+		UIManager.put("Button.minimumSize", new Dimension(160, 48));
 
-	    // BORDE PREMIUM (grafito medio + padding interno)
-	    UIManager.put("Button.border",
-	        BorderFactory.createCompoundBorder(
-	            BorderFactory.createLineBorder(GRAPHITE_D2, 2),
-	            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-	        )
-	    );
+		// BORDE PREMIUM (grafito medio + padding interno)
+		UIManager.put("Button.border", BorderFactory.createCompoundBorder(
+				BorderFactory.createLineBorder(GRAPHITE_D2, 2), BorderFactory.createEmptyBorder(10, 20, 10, 20)));
 
-	    // CAMPOS DE TEXTO
-	    UIManager.put("TextField.background", GRAPHITE_D1);
-	    UIManager.put("TextField.foreground", TEXT_LIGHT);
-	    UIManager.put("TextField.caretForeground", TEXT_LIGHT);
-	    UIManager.put("TextField.border",
-	        BorderFactory.createLineBorder(GRAPHITE_D2, 1)
-	    );
+		// CAMPOS DE TEXTO
+		UIManager.put("TextField.background", GRAPHITE_D1);
+		UIManager.put("TextField.foreground", TEXT_LIGHT);
+		UIManager.put("TextField.caretForeground", TEXT_LIGHT);
+		UIManager.put("TextField.border", BorderFactory.createLineBorder(GRAPHITE_D2, 1));
 
-	    // TEXTAREA (LOGS)
-	    UIManager.put("TextArea.background", BLACK);
-	    UIManager.put("TextArea.foreground", TEXT_LIGHT);
-	    UIManager.put("TextArea.caretForeground", TEXT_LIGHT);
+		// TEXTAREA (LOGS)
+		UIManager.put("TextArea.background", BLACK);
+		UIManager.put("TextArea.foreground", TEXT_LIGHT);
+		UIManager.put("TextArea.caretForeground", TEXT_LIGHT);
 
-	    // LISTAS
-	    UIManager.put("List.background", GRAPHITE_D1);
-	    UIManager.put("List.foreground", TEXT_LIGHT);
-	    UIManager.put("List.selectionBackground", ACCENT_GRAY);
-	    UIManager.put("List.selectionForeground", BLACK);
+		// LISTAS
+		UIManager.put("List.background", GRAPHITE_D1);
+		UIManager.put("List.foreground", TEXT_LIGHT);
+		UIManager.put("List.selectionBackground", ACCENT_GRAY);
+		UIManager.put("List.selectionForeground", BLACK);
 
-	    // SCROLLBARS
-	    UIManager.put("ScrollBar.background", BLACK);
-	    UIManager.put("ScrollBar.thumb", GRAPHITE_D2);
-	    UIManager.put("ScrollBar.track", BLACK);
+		// SCROLLBARS
+		UIManager.put("ScrollBar.background", BLACK);
+		UIManager.put("ScrollBar.thumb", GRAPHITE_D2);
+		UIManager.put("ScrollBar.track", BLACK);
 
-	    // SCROLLPANE
-	    UIManager.put("ScrollPane.background", BLACK);
-	    UIManager.put("ScrollPane.border",
-	        BorderFactory.createLineBorder(GRAPHITE_D2, 1)
-	    );
+		// SCROLLPANE
+		UIManager.put("ScrollPane.background", BLACK);
+		UIManager.put("ScrollPane.border", BorderFactory.createLineBorder(GRAPHITE_D2, 1));
 
-	    // PROGRESSBAR
-	    UIManager.put("ProgressBar.background", GRAPHITE_D2);
-	    UIManager.put("ProgressBar.foreground", ACCENT_GRAY);
-	    UIManager.put("ProgressBar.selectionBackground", TEXT_LIGHT);
-	    UIManager.put("ProgressBar.selectionForeground", BLACK);
+		// PROGRESSBAR
+		UIManager.put("ProgressBar.background", GRAPHITE_D2);
+		UIManager.put("ProgressBar.foreground", ACCENT_GRAY);
+		UIManager.put("ProgressBar.selectionBackground", TEXT_LIGHT);
+		UIManager.put("ProgressBar.selectionForeground", BLACK);
 
-	    // LABELS
-	    UIManager.put("Label.foreground", TEXT_LIGHT);
+		// LABELS
+		UIManager.put("Label.foreground", TEXT_LIGHT);
 
-	    // OPTIONPANE
-	    UIManager.put("OptionPane.background", BLACK);
-	    UIManager.put("OptionPane.messageForeground", TEXT_LIGHT);
+		// OPTIONPANE
+		UIManager.put("OptionPane.background", BLACK);
+		UIManager.put("OptionPane.messageForeground", TEXT_LIGHT);
 
-	    // TITLED BORDERS
-	    UIManager.put("TitledBorder.titleColor", TEXT_LIGHT);
-	    UIManager.put("TitledBorder.border",
-	        BorderFactory.createLineBorder(GRAPHITE_D2, 1)
-	    );
+		// TITLED BORDERS
+		UIManager.put("TitledBorder.titleColor", TEXT_LIGHT);
+		UIManager.put("TitledBorder.border", BorderFactory.createLineBorder(GRAPHITE_D2, 1));
 
-	    //  TOOLTIPS
-	    UIManager.put("ToolTip.background", GRAPHITE_LIGHT);
-	    UIManager.put("ToolTip.foreground", TEXT_LIGHT);
-	    UIManager.put("ToolTip.border",
-	        BorderFactory.createLineBorder(GRAPHITE_D1, 1)
-	    );
+		// TOOLTIPS
+		UIManager.put("ToolTip.background", GRAPHITE_LIGHT);
+		UIManager.put("ToolTip.foreground", TEXT_LIGHT);
+		UIManager.put("ToolTip.border", BorderFactory.createLineBorder(GRAPHITE_D1, 1));
 	}
 
-/* ----- lase utilitaria – borde redondeado con antialiasing ----- */
-class RoundedLineBorder extends LineBorder {
+	/* ----- lase utilitaria – borde redondeado con antialiasing ----- */
+	class RoundedLineBorder extends LineBorder {
 
-	private static final long serialVersionUID = 1L;
-	private final int radius;
+		private static final long serialVersionUID = 1L;
+		private final int radius;
 
-	RoundedLineBorder(Color color, int radius, int thickness) {
-		super(color, thickness);
-		this.radius = radius;
+		RoundedLineBorder(Color color, int radius, int thickness) {
+			super(color, thickness);
+			this.radius = radius;
+		}
+
+		@Override
+		public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
+			Graphics2D g2 = (Graphics2D) g.create();
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setColor(lineColor);
+			g2.setStroke(new BasicStroke(thickness));
+			g2.drawRoundRect(x, y, w - 1, h - 1, radius, radius);
+			g2.dispose();
+		}
 	}
-
-	@Override
-	public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
-		Graphics2D g2 = (Graphics2D) g.create();
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setColor(lineColor);
-		g2.setStroke(new BasicStroke(thickness));
-		g2.drawRoundRect(x, y, w - 1, h - 1, radius, radius);
-		g2.dispose();
-	}
-}
 }
